@@ -102,9 +102,10 @@ class CLIENT:
   async def add_bot(self, bot, message):
      user_id = int(message.from_user.id)
      msg = await bot.ask(chat_id=user_id, text=BOT_TOKEN_TEXT)
-     if msg.text=='/cancel':
-        return await msg.reply('Process Cancelled !')
-   elif not msg.text or ":" not in msg.text:
+     if msg.text == '/cancel':
+    return await msg.reply('Process Cancelled !')
+
+if not msg.text or ":" not in msg.text:
     return await msg.reply_text("Please send a valid bot token.")
      bot_token = re.findall(r'\d[0-9]{8,10}:[0-9A-Za-z_-]{35}', msg.text, re.IGNORECASE)
      bot_token = bot_token[0] if bot_token else None
