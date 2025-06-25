@@ -138,29 +138,36 @@ class CLIENT:
 
 
   async def add_session(self, bot, message):
-     user_id = int(message.from_user.id)
-     text = "<b>⚠️ Disclaimer ⚠️</b>\n\nYou Can Use Your Session For Forward Message From Private Chat To Another Chat.\nPlease Add Your Pyrogram Session With Your Own Risk. Their Is A Chance To Ban Your Account. My Developer Is Not Responsible If Your Account May Get Banned."
-     await bot.send_message(user_id, text=text)
-     msg = await bot.ask(chat_id=user_id, text="<b>Send your pyrogram session.\nget it from @mdsessiongenbot\n\n/cancel - cancel the process</b>")
-     if msg.text=='/cancel':
-        return await msg.reply('Process Cancelled !')
-     elif len(msg.text) < SESSION_STRING_SIZE:
-        return await msg.reply('Invalid Session String')
-     try:
-       client = await start_clone_bot(self.client(msg.text, True), True)
-     except Exception as e:
-       await msg.reply_text(f"<b>User Bot Error :</b> `{e}`")
-     user = client.me
-     details = {
-       'id': user.id,
-       'is_bot': False,
-       'user_id': user_id,
-       'name': user.first_name,
-       'session': msg.text,
-       'username': user.username
-     }
-     await db.add_bot(details)
-     return True
+        user_id = int(message.from_user.id)
+        text = "<b>⚠️ Disclaimer ⚠️</b>\n\nYou Can Use Your Session For Forward Message From Private Chat To Another Chat.\nPlease Add Your Pyrogram Session With Your Own Risk. There Is A Chance Your Account Gets Banned. Developer Not Responsible."
+        await bot.send_message(user_id, text=text)
+
+        msg = await bot.ask(
+            chat_id=user_id,
+            text="<b>Send your pyrogram session.\nGet it from @mdsessiongenbot\n\n/cancel - cancel the process</b>"
+        )
+
+        if msg.text == '/cancel':
+            return await msg.reply('Process Cancelled !')
+        elif len(msg.text) < SESSION_STRING_SIZE:
+            return await msg.reply('Invalid Session String')
+
+        try:
+            client = await start_clone_bot(self.client(msg.text, True), True)
+        except Exception as e:
+            return await msg.reply_text(f"<b>User Bot Error :</b> `{e}`")
+
+        user = client.me
+        details = {
+            'id': user.id,
+            'is_bot': False,
+            'user_id': user_id,
+            'name': user.first_name,
+            'session': msg.text,
+            'username': user.username
+        }
+        await db.add_bot(details)
+        return True
     
 
 
