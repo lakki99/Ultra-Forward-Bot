@@ -95,37 +95,37 @@ class CLIENT:
         return Client("USERBOT", self.api_id, self.api_hash, session_string=data)
      elif user != False:
         data = data.get('token')
-     return Client("BOT", self.api_id, self.api_hash, bot_token=data, in_memory=True)
-  
-
-
   async def add_bot(self, bot, message):
-     user_id = int(message.from_user.id)
-     msg = await bot.ask(chat_id=user_id, text=BOT_TOKEN_TEXT)
-     if msg.text == '/cancel':
-    return await msg.reply('Process Cancelled !')
+    user_id = int(message.from_user.id)
+    msg = await bot.ask(chat_id=user_id, text=BOT_TOKEN_TEXT)
 
-if not msg.text or ":" not in msg.text:
-    return await msg.reply_text("Please send a valid bot token.")
-     bot_token = re.findall(r'\d[0-9]{8,10}:[0-9A-Za-z_-]{35}', msg.text, re.IGNORECASE)
-     bot_token = bot_token[0] if bot_token else None
-     if not bot_token:
-       return await msg.reply_text("There Is No Bot Token In That Message")
-     try:
-       _client = await start_clone_bot(self.client(bot_token, False), True)
-     except Exception as e:
-       await msg.reply_text(f"Bot Error :</b> `{e}`")
-     _bot = _client.me
-     details = {
-       'id': _bot.id,
-       'is_bot': True,
-       'user_id': user_id,
-       'name': _bot.first_name,
-       'token': bot_token,
-       'username': _bot.username 
-     }
-     await db.add_bot(details)
-     return True
+    if msg.text == '/cancel':
+        return await msg.reply('Process Cancelled !')
+
+    if not msg.text or ":" not in msg.text:
+        return await msg.reply_text("Please send a valid bot token.")
+
+    bot_token = re.findall(r'\d[0-9]{8,10}:[0-9A-Za-z_-]{35}', msg.text, re.IGNORECASE)
+    bot_token = bot_token[0] if bot_token else None
+    if not bot_token:
+        return await msg.reply_text("There Is No Bot Token In That Message")
+
+    try:
+        _client = await start_clone_bot(self.client(bot_token, False), True)
+    except Exception as e:
+        return await msg.reply_text(f"Bot Error :</b> `{e}`")
+
+    _bot = _client.me
+    details = {
+        'id': _bot.id,
+        'is_bot': True,
+        'user_id': user_id,
+        'name': _bot.first_name,
+        'token': bot_token,
+        'username': _bot.username
+    }
+    await db.add_bot(details)
+    return True
     
 
 
