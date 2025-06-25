@@ -1,5 +1,5 @@
 # Jishu Developer 
-# Don't Remove Credit 🥺
+# Don't Remove Credit ЁЯе║
 # Telegram Channel @Madflix_Bots
 # Backup Channel @JishuBotz
 # Developer @JishuDeveloper
@@ -83,177 +83,89 @@ async def start_clone_bot(FwdBot, data=None):
 
 
 
-class CLIENT:
-    def __init__(self):
-        self.api_id = Config.API_ID
-        self.api_hash = Config.API_HASH
+class CLIENT: 
+  def __init__(self):
+     self.api_id = Config.API_ID
+     self.api_hash = Config.API_HASH
+    
+  def client(self, data, user=None):
+     if user == None and data.get('is_bot') == False:
+        return Client("USERBOT", self.api_id, self.api_hash, session_string=data.get('session'))
+     elif user == True:
+        return Client("USERBOT", self.api_id, self.api_hash, session_string=data)
+     elif user != False:
+        data = data.get('token')
+     return Client("BOT", self.api_id, self.api_hash, bot_token=data, in_memory=True)
+  
 
-    def client(self, data, user=None):
-        # Case 1: dict type session for userbot
-        if user is None and isinstance(data, dict) and not data.get('is_bot', True):
-            return Client("USERBOT", self.api_id, self.api_hash, session_string=data.get('session'))
 
-        # Case 2: string session for userbot
-        elif user is True and isinstance(data, str):
-            return Client("USERBOT", self.api_id, self.api_hash, session_string=data)
-
-        # Case 3: bot token for bot client
-        elif user is False and isinstance(data, str):
-            return Client("BOT", self.api_id, self.api_hash, bot_token=data, in_memory=True)
-
-        return None  # fallback
-
-    async def add_bot(self, bot, message):
-        user_id = int(message.from_user.id)
-        msg = await bot.ask(chat_id=user_id, text=BOT_TOKEN_TEXT)
-
-        if msg.text == '/cancel':
-            return await msg.reply('Process Cancelled !')
-
-        if not msg.text or ":" not in msg.text:
-            return await msg.reply_text("Please send a valid bot token.")
-
-        bot_token = re.findall(r'\d[0-9]{8,10}:[0-9A-Za-z_-]{35}', msg.text, re.IGNORECASE)
-        bot_token = bot_token[0] if bot_token else None
-        if not bot_token:
-            return await msg.reply_text("There Is No Bot Token In That Message")
-
-        try:
-            _client = await start_clone_bot(self.client(bot_token, False), True)
-        except Exception as e:
-            return await msg.reply_text(f"Bot Error :</b> `{e}`")
-
-        _bot = _client.me
-        details = {
-            'id': _bot.id,
-            'is_bot': True,
-            'user_id': user_id,
-            'name': _bot.first_name,
-            'token': bot_token,
-            'username': _bot.username
-        }
-        await db.add_bot(details)
-        return True
+  async def add_bot(self, bot, message):
+     user_id = int(message.from_user.id)
+     msg = await bot.ask(chat_id=user_id, text=BOT_TOKEN_TEXT)
+     if msg.text=='/cancel':
+        return await msg.reply('Process Cancelled !')
+     elif not msg.forward_date:
+       return await msg.reply_text("This Is Not A Forward Message")
+     elif str(msg.forward_from.id) != "93372553":
+       return await msg.reply_text("This Message Was Not Forward From Bot Father")
+     bot_token = re.findall(r'\d[0-9]{8,10}:[0-9A-Za-z_-]{35}', msg.text, re.IGNORECASE)
+     bot_token = bot_token[0] if bot_token else None
+     if not bot_token:
+       return await msg.reply_text("There Is No Bot Token In That Message")
+     try:
+       _client = await start_clone_bot(self.client(bot_token, False), True)
+     except Exception as e:
+       await msg.reply_text(f"Bot Error :</b> `{e}`")
+     _bot = _client.me
+     details = {
+       'id': _bot.id,
+       'is_bot': True,
+       'user_id': user_id,
+       'name': _bot.first_name,
+       'token': bot_token,
+       'username': _bot.username 
+     }
+     await db.add_bot(details)
+     return True
     
 
 
   async def add_session(self, bot, message):
-import os import re import sys import typing import asyncio import logging from typing import Union, Optional, AsyncGenerator
-
-from pyrogram import Client, filters from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message, CallbackQuery from pyrogram.errors.exceptions.bad_request_400 import AccessTokenExpired, AccessTokenInvalid from pyrogram.errors import FloodWait
-
-from config import Config, temp from database import db from translation import Translation
-
-logger = logging.getLogger(name) logger.setLevel(logging.INFO)
-
-BTN_URL_REGEX = re.compile(r"(]+?)buttonurl:/{0,2}(.+?)(:same)?])") BOT_TOKEN_TEXT = "1) Create A Bot Using @BotFather\n\n2) Then You Will Get A Message With Bot Token\n\n3) Forward That Message To Me" SESSION_STRING_SIZE = 351
-
-async def start_clone_bot(FwdBot, data=None): await FwdBot.start()
-
-async def iter_messages(
-    self,
-    chat_id: Union[int, str],
-    limit: int,
-    offset: int = 0,
-    search: str = None,
-    filter: "types.TypeMessagesFilter" = None,
-) -> Optional[AsyncGenerator["types.Message", None]]:
-    current = offset
-    while True:
-        new_diff = min(200, limit - current)
-        if new_diff <= 0:
-            return
-        messages = await self.get_messages(chat_id, list(range(current, current + new_diff + 1)))
-        for message in messages:
-            yield message
-            current += 1
-
-FwdBot.iter_messages = iter_messages
-return FwdBot
-
-class CLIENT: def init(self): self.api_id = Config.API_ID self.api_hash = Config.API_HASH
-
-def client(self, data, user=None):
-    if user is None and isinstance(data, dict) and not data.get('is_bot', True):
-        return Client("USERBOT", self.api_id, self.api_hash, session_string=data.get('session'))
-    elif user is True and isinstance(data, str):
-        return Client("USERBOT", self.api_id, self.api_hash, session_string=data)
-    elif user is False and isinstance(data, str):
-        return Client("BOT", self.api_id, self.api_hash, bot_token=data, in_memory=True)
-    return None
-
-async def add_bot(self, bot, message):
-    user_id = int(message.from_user.id)
-    msg = await bot.ask(chat_id=user_id, text=BOT_TOKEN_TEXT)
-
-    if msg.text == '/cancel':
+     user_id = int(message.from_user.id)
+     text = "<b>тЪая╕П Disclaimer тЪая╕П</b>\n\nYou Can Use Your Session For Forward Message From Private Chat To Another Chat.\nPlease Add Your Pyrogram Session With Your Own Risk. Their Is A Chance To Ban Your Account. My Developer Is Not Responsible If Your Account May Get Banned."
+     await bot.send_message(user_id, text=text)
+     msg = await bot.ask(chat_id=user_id, text="<b>Send your pyrogram session.\nget it from @mdsessiongenbot\n\n/cancel - cancel the process</b>")
+     if msg.text=='/cancel':
         return await msg.reply('Process Cancelled !')
-    elif not msg.forward_date:
-        return await msg.reply_text("This Is Not A Forward Message")
-    elif str(msg.forward_from.id) != "93372553":
-        return await msg.reply_text("This Message Was Not Forward From Bot Father")
-
-    bot_token = re.findall(r'\d[0-9]{8,10}:[0-9A-Za-z_-]{35}', msg.text, re.IGNORECASE)
-    bot_token = bot_token[0] if bot_token else None
-    if not bot_token:
-        return await msg.reply_text("There Is No Bot Token In That Message")
-
-    try:
-        _client = await start_clone_bot(self.client(bot_token, False), True)
-    except Exception as e:
-        return await msg.reply_text(f"Bot Error :</b> `{e}`")
-
-    _bot = _client.me
-    details = {
-        'id': _bot.id,
-        'is_bot': True,
-        'user_id': user_id,
-        'name': _bot.first_name,
-        'token': bot_token,
-        'username': _bot.username
-    }
-    await db.add_bot(details)
-    return True
-
-async def add_session(self, bot, message):
-    user_id = int(message.from_user.id)
-    text = (
-        "<b>⚠️ Disclaimer ⚠️</b>\n\n"
-        "You Can Use Your Session For Forward Message From Private Chat To Another Chat.\n"
-        "Please Add Your Pyrogram Session With Your Own Risk. There Is A Chance To Ban Your Account."
-        " Developer Is Not Responsible If Your Account Gets Banned."
-    )
-    await bot.send_message(user_id, text=text)
-
-    msg = await bot.ask(chat_id=user_id, text="<b>Send your pyrogram session.\nget it from @mdsessiongenbot\n\n/cancel - cancel the process</b>")
-    if msg.text == '/cancel':
-        return await msg.reply('Process Cancelled !')
-    elif len(msg.text) < SESSION_STRING_SIZE:
+     elif len(msg.text) < SESSION_STRING_SIZE:
         return await msg.reply('Invalid Session String')
-
-    try:
-        client = await start_clone_bot(self.client(msg.text, True), True)
-    except Exception as e:
-        return await msg.reply_text(f"<b>User Bot Error :</b> `{e}`")
-
-    user = client.me
-    details = {
-        'id': user.id,
-        'is_bot': False,
-        'user_id': user_id,
-        'name': user.first_name,
-        'session': msg.text,
-        'username': user.username
-    }
-    await db.add_bot(details)
-    return True
-
-@Client.on_message(filters.private & filters.command('reset')) async def forward_tag(bot, m): default = await db.get_configs("01")
+     try:
+       client = await start_clone_bot(self.client(msg.text, True), True)
+     except Exception as e:
+       await msg.reply_text(f"<b>User Bot Error :</b> `{e}`")
+     user = client.me
+     details = {
+       'id': user.id,
+       'is_bot': False,
+       'user_id': user_id,
+       'name': user.first_name,
+       'session': msg.text,
+       'username': user.username
+     }
+     await db.add_bot(details)
+     return True
+    
 
 
+
+
+
+@Client.on_message(filters.private & filters.command('reset'))
+async def forward_tag(bot, m):
+    default = await db.get_configs("01")
     temp.CONFIGS[m.from_user.id] = default
     await db.update_configs(m.from_user.id, default)
-    await m.reply("Successfully Settings Reseted ✔️")
+    await m.reply("Successfully Settings Reseted тЬФя╕П")
 
 
 
@@ -331,7 +243,7 @@ def parse_buttons(text, markup=True):
 
 
 # Jishu Developer 
-# Don't Remove Credit 🥺
+# Don't Remove Credit ЁЯе║
 # Telegram Channel @Madflix_Bots
 # Backup Channel @JishuBotz
 # Developer @JishuDeveloper
