@@ -83,49 +83,57 @@ async def start_clone_bot(FwdBot, data=None):
 
 
 
-class CLIENT: 
-  def __init__(self):
-     self.api_id = Config.API_ID
-     self.api_hash = Config.API_HASH
-    
-  def client(self, data, user=None):
-     if user == None and data.get('is_bot') == False:
-        return Client("USERBOT", self.api_id, self.api_hash, session_string=data.get('session'))
-     elif user == True:
-        return Client("USERBOT", self.api_id, self.api_hash, session_string=data)
-     elif user != False:
-        data = data.get('token')
-  async def add_bot(self, bot, message):
-    user_id = int(message.from_user.id)
-    msg = await bot.ask(chat_id=user_id, text=BOT_TOKEN_TEXT)
+class CLIENT:
+    def __init__(self):
+        self.api_id = Config.API_ID
+        self.api_hash = Config.API_HASH
 
-    if msg.text == '/cancel':
-        return await msg.reply('Process Cancelled !')
+    def client(self, data, user=None):
+        # Case 1: dict type session for userbot
+        if user is None and isinstance(data, dict) and not data.get('is_bot', True):
+            return Client("USERBOT", self.api_id, self.api_hash, session_string=data.get('session'))
 
-    if not msg.text or ":" not in msg.text:
-        return await msg.reply_text("Please send a valid bot token.")
+        # Case 2: string session for userbot
+        elif user is True and isinstance(data, str):
+            return Client("USERBOT", self.api_id, self.api_hash, session_string=data)
 
-    bot_token = re.findall(r'\d[0-9]{8,10}:[0-9A-Za-z_-]{35}', msg.text, re.IGNORECASE)
-    bot_token = bot_token[0] if bot_token else None
-    if not bot_token:
-        return await msg.reply_text("There Is No Bot Token In That Message")
+        # Case 3: bot token for bot client
+        elif user is False and isinstance(data, str):
+            return Client("BOT", self.api_id, self.api_hash, bot_token=data, in_memory=True)
 
-    try:
-        _client = await start_clone_bot(self.client(bot_token, False), True)
-    except Exception as e:
-        return await msg.reply_text(f"Bot Error :</b> `{e}`")
+        return None  # fallback
 
-    _bot = _client.me
-    details = {
-        'id': _bot.id,
-        'is_bot': True,
-        'user_id': user_id,
-        'name': _bot.first_name,
-        'token': bot_token,
-        'username': _bot.username
-    }
-    await db.add_bot(details)
-    return True
+    async def add_bot(self, bot, message):
+        user_id = int(message.from_user.id)
+        msg = await bot.ask(chat_id=user_id, text=BOT_TOKEN_TEXT)
+
+        if msg.text == '/cancel':
+            return await msg.reply('Process Cancelled !')
+
+        if not msg.text or ":" not in msg.text:
+            return await msg.reply_text("Please send a valid bot token.")
+
+        bot_token = re.findall(r'\d[0-9]{8,10}:[0-9A-Za-z_-]{35}', msg.text, re.IGNORECASE)
+        bot_token = bot_token[0] if bot_token else None
+        if not bot_token:
+            return await msg.reply_text("There Is No Bot Token In That Message")
+
+        try:
+            _client = await start_clone_bot(self.client(bot_token, False), True)
+        except Exception as e:
+            return await msg.reply_text(f"Bot Error :</b> `{e}`")
+
+        _bot = _client.me
+        details = {
+            'id': _bot.id,
+            'is_bot': True,
+            'user_id': user_id,
+            'name': _bot.first_name,
+            'token': bot_token,
+            'username': _bot.username
+        }
+        await db.add_bot(details)
+        return True
     
 
 
